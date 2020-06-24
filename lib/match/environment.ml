@@ -1,21 +1,21 @@
-open Core_kernel
+open Base
 
 module Data = struct
   type t =
     { value : string
     ; range : Range.t
     }
-  [@@deriving yojson, eq, sexp]
+  [@@deriving yojson, eq]
 end
 
 open Data
 type data = Data.t
-[@@deriving yojson, eq, sexp]
+[@@deriving yojson]
 
-type t = data Core_kernel.String.Map.t
+type t = (string, data, Base.String.comparator_witness) Base.Map.t
 
 let create () : t =
-  String.Map.empty
+  Map.empty (module String)
 
 let vars (env : t) : string list =
   Map.keys env

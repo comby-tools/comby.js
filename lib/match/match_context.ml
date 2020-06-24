@@ -1,4 +1,6 @@
-open Core_kernel
+open Base
+
+open Polymorphic_compare
 
 type t =
   { range : Range.t

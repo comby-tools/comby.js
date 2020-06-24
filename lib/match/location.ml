@@ -1,11 +1,9 @@
-open Core_kernel
-
 type t =
   { offset : int
   ; line : int
   ; column : int
   }
-[@@deriving yojson, eq, sexp]
+[@@deriving yojson, eq]
 
 let default =
   { offset = -1

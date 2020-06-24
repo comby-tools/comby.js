@@ -4,26 +4,26 @@ module Location : sig
     ; line : int
     ; column : int
     }
-  [@@deriving yojson, eq, sexp]
+  [@@deriving yojson, eq]
 
   val default : t
 end
 
 type location = Location.t
-[@@deriving yojson, eq, sexp]
+[@@deriving yojson, eq]
 
 module Range : sig
   type t =
     { match_start : location [@key "start"]
     ; match_end : location [@key "end"]
     }
-  [@@deriving yojson, eq, sexp]
+  [@@deriving yojson, eq]
 
   val default : t
 end
 
 type range = Range.t
-[@@deriving yojson, eq, sexp]
+[@@deriving yojson, eq]
 
 module Environment : sig
   type t
