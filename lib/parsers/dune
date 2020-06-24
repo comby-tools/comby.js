@@ -1,5 +1,4 @@
 (library
   (name parsers)
   (public_name comby_js.parsers)
-  (preprocess (pps ppx_sexp_conv))
-  (libraries angstrom ppxlib core_kernel ))
+  (libraries angstrom ppxlib base))
