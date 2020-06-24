@@ -1,4 +1,6 @@
-open Core_kernel
+open Base
+
+open Polymorphic_compare
 
 module Syntax = struct
   type escapable_string_literals =

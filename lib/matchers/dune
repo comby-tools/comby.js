@@ -1,5 +1,5 @@
 (library
   (name matchers)
   (public_name comby_js.matchers)
-  (preprocess (pps ppx_here ppx_sexp_conv ppx_sexp_message ppx_deriving_yojson))
-  (libraries comby_js.parsers comby_js.match angstrom ppxlib core_kernel core.uuid  yojson))
+  (preprocess (pps ppx_here ppx_deriving_yojson))
+  (libraries comby_js.parsers comby_js.match angstrom ppxlib core_kernel yojson))

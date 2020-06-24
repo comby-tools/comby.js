@@ -1,4 +1,4 @@
-open Core_kernel
+open Base
 
 open Angstrom
 
@@ -10,17 +10,16 @@ let configuration_ref = ref (Configuration.create ())
 let matches_ref : Match.t list ref = ref []
 let source_ref : string ref = ref ""
 let current_environment_ref : Match.Environment.t ref = ref (Match.Environment.create ())
+let unique_counter = ref 0
 
 let (|>>) p f =
   p >>= fun x -> return (f x)
 
 let debug =
-  Sys.getenv_opt "DEBUG_COMBY"
-  |> Option.is_some
+  false
 
 let rewrite =
-  Sys.getenv_opt "REWRITE"
-  |> Option.is_some
+  false
 
 let actual = Buffer.create 10
 
@@ -60,7 +59,8 @@ let record_match_context pos_before pos_after =
   if debug then Format.printf "match context start pos: %d@." pos_before;
   if debug then Format.printf "match context end pos %d@." pos_after;
   let extract_matched_text source { offset = match_start; _ } { offset = match_end; _ } =
-    String.slice source match_start match_end
+    (* FIXME: we'll need to implement our own slice *)
+    Core_kernel.String.slice source match_start match_end
   in
   (* line/col values are placeholders and not accurate until processed in pipeline.ml *)
   let match_context =
@@ -121,9 +121,9 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
       let environment =
         match Environment.exists !current_environment_ref identifier with
         | true ->
-          (* FIXME: get rid of UUID *)
           let fresh_hole_id =
-            Format.sprintf "%s_%s_equal" Uuid_unix.(Fn.compose Uuid.to_string create ()) identifier
+            unique_counter := !unique_counter + 1;
+            Format.sprintf "%d_%s_equal" !unique_counter identifier;
           in
           add fresh_hole_id
         | false -> add identifier
@@ -184,7 +184,7 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
 
   let until_of_from from =
     Syntax.user_defined_delimiters
-    |> List.find_map ~f:(fun (from', until) -> if from = from' then Some until else None)
+    |> List.find_map ~f:(fun (from', until) -> if String.equal from from' then Some until else None)
     |> function
     | Some until -> until
     | None -> assert false
@@ -821,7 +821,7 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
   let all ?configuration ~template ~source : Match.t list =
     configuration_ref := Option.value configuration ~default:!configuration_ref;
     matches_ref := [];
-    if template = "" && source = "" then [trivial]
+    if String.equal template "" && String.equal source "" then [trivial]
     else match first_is_broken template source with
       | Ok _
       | Error _ -> List.rev !matches_ref
