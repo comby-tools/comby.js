@@ -10,7 +10,7 @@ let configuration_ref = ref (Configuration.create ())
 let matches_ref : Match.t list ref = ref []
 let source_ref : string ref = ref ""
 let current_environment_ref : Match.Environment.t ref = ref (Match.Environment.create ())
-let unique_counter = ref 0
+let uuid_equality_counter = ref 0
 
 let (|>>) p f =
   p >>= fun x -> return (f x)
@@ -122,8 +122,8 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
         match Environment.exists !current_environment_ref identifier with
         | true ->
           let fresh_hole_id =
-            unique_counter := !unique_counter + 1;
-            Format.sprintf "%d_%s_equal" !unique_counter identifier;
+            uuid_equality_counter := !uuid_equality_counter + 1;
+            Format.sprintf "%d_%s_equal" !uuid_equality_counter identifier;
           in
           add fresh_hole_id
         | false -> add identifier

@@ -1,12 +1,12 @@
-open Core_kernel
+open Base
+
+open Polymorphic_compare
 
 open Match
 open Replacement
 
 let debug =
-  Sys.getenv_opt "DEBUG_COMBY"
-  |> Option.is_some
-
+  false
 
 let substitute_match_contexts (matches: Match.t list) source replacements =
   if debug then

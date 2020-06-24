@@ -1,11 +1,13 @@
 open Angstrom
-open Core_kernel
+open Base
 
 open Match
 
 let debug =
-  Sys.getenv_opt "DEBUG_COMBY"
-  |> Option.is_some
+  false
+
+let uuid_for_id_counter = ref 0
+let uuid_for_sub_counter = ref 0
 
 (** Parse the first :[id(label)] label encountered in the template. *)
 let parse_first_label template =
@@ -19,22 +21,22 @@ let parse_first_label template =
   in
   parse_string parser template
   |> function
-  | Ok label -> List.find_map label ~f:ident
+  | Ok label -> List.find_map label ~f:(fun x -> x)
   | Error _ -> None
 
 let substitute_fresh template =
-  let label_table = String.Table.create () in
+  let label_table = Hashtbl.create (module String) in
   let template_ref = ref template in
   let current_label_ref = ref (parse_first_label !template_ref) in
   while Option.is_some !current_label_ref do
     let label = Option.value_exn !current_label_ref in
     let id =
-      match String.Table.find label_table label with
+      match Hashtbl.find label_table label with
       | Some id -> id
       | None ->
-        let uuid = Uuid_unix.(Fn.compose Uuid.to_string create ()) in
-        let id = String.suffix uuid 12 in
-        String.Table.add_exn label_table ~key:label ~data:id;
+        uuid_for_id_counter := !uuid_for_id_counter + 1;
+        let id = Format.sprintf "%012d" !uuid_for_id_counter in
+        Hashtbl.add_exn label_table ~key:label ~data:id;
         id
     in
     let pattern = ":[id(" ^ label ^ ")]" in
@@ -85,10 +87,11 @@ let of_match_context
     if start_index = 0 then
       ""
     else
-      String.slice source 0 start_index
+      Core_kernel.String.slice source 0 start_index
   in
-  let after_part = String.slice source end_index (String.length source) in
-  let hole_id = Uuid_unix.(Fn.compose Uuid.to_string create ()) in
+  let after_part = Core_kernel.String.slice source end_index (String.length source) in
+  uuid_for_sub_counter := !uuid_for_sub_counter + 1;
+  let hole_id = Format.sprintf "sub_%012d" !uuid_for_sub_counter in
   let rewrite_template = String.concat [before_part; ":["; hole_id;  "]"; after_part] in
   hole_id, rewrite_template
 
