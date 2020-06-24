@@ -1,4 +1,4 @@
-open Core_kernel
+open Base
 open Angstrom
 
 open Match
@@ -98,7 +98,7 @@ let rec apply
             | Variable _ ->
               failwith "| :[hole] is invalid. Maybe you meant to put quotes")
       in
-      Option.value_map result ~f:ident ~default:(false, Some env)
+      Option.value_map result ~f:(fun x -> x) ~default:(false, Some env)
     | Match (String template, cases) ->
       let source, _ = Rewriter.Rewrite_template.substitute template env in
       let fresh_var = Uuid_unix.(Fn.compose Uuid.to_string create ()) in
@@ -142,7 +142,7 @@ let rec apply
             | None ->
               return (true, Some env)
           in
-          Option.value_map result ~f:ident ~default:(false, Some env)
+          Option.value_map result ~f:(fun x -> x) ~default:(false, Some env)
         | _ -> failwith "Not implemented yet"
       end
     | Rewrite _ -> failwith "TODO/Invalid: Have not decided whether rewrite \":[x]\" is useful."

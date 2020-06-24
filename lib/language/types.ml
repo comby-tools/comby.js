@@ -1,4 +1,4 @@
-open Core_kernel
+open Base
 
 open Matchers
 open Match
