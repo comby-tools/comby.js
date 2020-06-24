@@ -1,0 +1,38 @@
+opam-version: "2.0"
+version: "dev"
+maintainer: "rvantonder@gmail.com"
+authors: "Rijnard van Tonder"
+homepage: "https://github.com/comby-tools/comby.js"
+bug-reports: "https://github.com/comby-tools/comby.js/issues"
+dev-repo: "git+https://github.com/comby-tools/comby.js.git"
+license: "Apache-2.0"
+build: [
+    ["dune" "build" "-p" name "-j" jobs "@install"]
+]
+depends: [
+  "js_of_ocaml"
+  "ocaml_kernel" {>= "4.08.1"}
+  "core_kernel" {>= "0.12.2"}
+  "ppxlib"
+  "ppx_deriving"
+  "angstrom" {< "0.14.0"}
+  "lwt_react"
+  "ppx_deriving_yojson"
+  "ppx_tools_versioned" {>= "5.2.3"}
+]
+depexts: [
+    [
+      "pkg-config"
+      "libpcre3-dev"
+      "zlib1g-dev"
+      "m4"
+      "libgmp-dev"
+    ] {os-distribution = "ubuntu"}
+    [
+      "pkg-config"
+      "pcre"
+      "gmp"
+    ] {os-distribution = "macos"}
+]
+synopsis: "A Javascript adaptation for comby, a tool for structural code search and replace that supports ~every language"
+description: ""

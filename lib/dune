@@ -1,0 +1,13 @@
+(library
+  (name comby_js)
+  (public_name comby_js)
+  (preprocess (pps ppx_deriving.show ppx_deriving.eq ppx_sexp_conv))
+  (libraries 
+   ppxlib 
+   core_kernel comby_js.language
+   comby_js.match
+   comby_js.matchers
+   comby_js.replacement
+   comby_js.rewriter
+   comby_js.server_types
+   comby_js.statistics))

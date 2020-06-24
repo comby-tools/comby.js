@@ -1,0 +1,10 @@
+.merlin
+_build
+*.install
+/dune-project
+\#*
+.\#*
+scripts/0.*
+scripts/1.*
+*.swp
+js
