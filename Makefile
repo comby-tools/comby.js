@@ -4,10 +4,10 @@ all: best
 best:
 	@dune build @@default
 	@cp _build/install/default/bin/comby.js js
-	@du -h js/comby.js
 	@sed -i .orig "s|steps=\[0,20|steps=\[0,1|" js/comby.js
 	@sed -i .orig "s|max_steps=20|max_steps=1|" js/comby.js
 	@rm js/comby.js.orig
+	@du -h js/comby.js
 
 # Using dune for separate compiliation. Produces a bigger final JS file, but always works.
 build:

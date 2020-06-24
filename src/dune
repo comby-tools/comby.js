@@ -17,9 +17,12 @@
               %{lib:core_kernel:strftime.js}
               %{lib:core_kernel:runtime.js}
               %{lib:bigstringaf:runtime.js}
-         --no-inline
+;        --no-inline
 ;        --debug-info
-         --source-map %{dep:comby.bc} -o %{targets} --pretty)))
+;        Pretty is actually the flag needed for larger inputs to work. For some reason.
+         --pretty
+         --source-map %{dep:comby.bc}
+         -o %{targets})))
 
 (alias
   (name default)
