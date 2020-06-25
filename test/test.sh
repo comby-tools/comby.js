@@ -8,7 +8,7 @@ if [ "$N" != "55" ]; then
     exit 1
 fi
 
-M=`node search-big-go.js | jq length`
+M=`node search-go-big.js | jq length`
 
 if [ "$M" != "1039" ]; then
     echo "Big Bad saw $M"
