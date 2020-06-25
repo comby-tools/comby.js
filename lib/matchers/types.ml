@@ -120,6 +120,8 @@ module Matcher = struct
 
     val set_rewrite_template : string -> unit
 
+    val get_rewrite_result : unit -> string
+
     val all
       :  ?configuration:Configuration.t
       -> template:string

@@ -11,14 +11,12 @@ let matches_ref : Match.t list ref = ref []
 let source_ref : string ref = ref ""
 let current_environment_ref : Match.Environment.t ref = ref (Match.Environment.create ())
 let uuid_equality_counter = ref 0
+let rewrite = ref false
 
 let (|>>) p f =
   p >>= fun x -> return (f x)
 
 let debug =
-  false
-
-let rewrite =
   false
 
 let actual = Buffer.create 10
@@ -79,7 +77,7 @@ let record_match_context pos_before pos_after =
   (* Don't just append, but replace the match context including constant
      strings. I.e., somewhere where we are appending the parth that matched, it
      shouldn't, and instead just ignore. *)
-  if rewrite then Buffer.add_string actual result;
+  if !rewrite then Buffer.add_string actual result;
   matches_ref := match_context :: !matches_ref
 
 module Make (Syntax : Syntax.S) (Info : Info.S) = struct
@@ -92,7 +90,7 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
   let f acc (production : production) =
     match production with
     | String s -> (* unmatched, append when we rewrite *)
-      if rewrite then Buffer.add_string actual s;
+      if !rewrite then Buffer.add_string actual s;
       acc
     | Template_string _ -> acc (* matched. if a constant string in the template is matched, don't append it *)
     | Unit -> if debug then Format.printf "Unit@."; acc
@@ -772,7 +770,7 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
     let state = Buffered.feed state `Eof in
     match state with
     | Buffered.Done ({ len; off; _ }, (_, _result_string)) ->
-      if rewrite then Format.eprintf "Result string:@.---@.%s---@." @@ Buffer.contents actual;
+      (*if !rewrite then Format.eprintf "Result string:@.---@.%s---@." @@ Buffer.contents actual;*)
       if len <> 0 then
         (if debug then Format.eprintf "Input left over in parse where not expected: off(%d) len(%d)" off len;
          Or_error.error_string "Does not match template")
@@ -797,7 +795,12 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
       end
 
   let set_rewrite_template rewrite_template' =
+    rewrite := true;
     rewrite_template := rewrite_template'
+
+  let get_rewrite_result () =
+    rewrite := false;
+    Buffer.contents actual
 
   (** Hardcoded case when template and source are empty string. The parser logic
       is too tricky for this right now. *)
