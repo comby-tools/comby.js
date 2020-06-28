@@ -12,6 +12,7 @@ let source_ref : string ref = ref ""
 let current_environment_ref : Match.Environment.t ref = ref (Match.Environment.create ())
 let uuid_equality_counter = ref 0
 let rewrite = ref false
+let rule_ref = ref None
 
 let (|>>) p f =
   p >>= fun x -> return (f x)
@@ -823,8 +824,12 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
     in
     Match.create ~range ()
 
-  let all ?configuration ?rule:_ ~template ~source : Match.t list =
+  let all ?configuration ?rule ~template ~source : Match.t list =
     configuration_ref := Option.value configuration ~default:!configuration_ref;
+    begin match rule with
+      | None | Some "" -> rule_ref := None
+      | Some r -> rule_ref := Some (Omega_rule.create r |> Or_error.ok_exn)
+    end;
     matches_ref := [];
     if String.equal template "" && String.equal source "" then [trivial]
     else match first_is_broken template source with
