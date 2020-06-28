@@ -4,7 +4,8 @@
   (preprocess (pps ppx_deriving.eq))
   (libraries 
    ppxlib 
-   core_kernel comby_js.language
+   core_kernel 
+   comby_js.language
    comby_js.match
    comby_js.matchers
    comby_js.pipeline
