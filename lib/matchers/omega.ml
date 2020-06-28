@@ -824,12 +824,14 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
     in
     Match.create ~range ()
 
-  let all ?configuration ?rule ~template ~source : Match.t list =
+  let all ?configuration ?rule:_ ~template ~source : Match.t list =
     configuration_ref := Option.value configuration ~default:!configuration_ref;
+    (*
     begin match rule with
       | None | Some "" -> rule_ref := None
-      | Some r -> rule_ref := Some (Omega_rule.create r |> Or_error.ok_exn)
+      | Some r -> rule_ref := Some (Language.Rule.create r |> Or_error.ok_exn)
     end;
+       *)
     matches_ref := [];
     if String.equal template "" && String.equal source "" then [trivial]
     else match first_is_broken template source with

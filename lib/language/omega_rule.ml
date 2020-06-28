@@ -140,7 +140,7 @@ let rec apply
             let result =
               match matches with
               | [] -> None
-              | _ -> Some (Matchers.Omega.C.get_rewrite_result ())
+              | _ -> Some (Matcher.get_rewrite_result ())
             in
             match result with
             | Some rewritten_source ->

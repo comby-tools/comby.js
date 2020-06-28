@@ -1,4 +1,4 @@
 (library
   (name language)
   (public_name comby_js.language)
-  (libraries comby_js.parsers comby_js.match comby_js.matchers comby_js.rewriter ppxlib base))
+  (libraries comby_js.parsers comby_js.match comby_js.rewriter ppxlib base))
