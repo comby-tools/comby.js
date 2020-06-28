@@ -24,6 +24,18 @@ let actual = Buffer.create 10
 
 let rewrite_template = ref ""
 
+let infer_equality_constraints environment =
+  let vars = Match.Environment.vars environment in
+  List.fold vars ~init:[] ~f:(fun acc var ->
+      if String.is_suffix var ~suffix:"_equal" then
+        match String.split var ~on:'_' with
+        | _uuid :: target :: _equal ->
+          let expression = Rule_language.Ast.Equal (Variable var, Variable target) in
+          expression::acc
+        | _ -> acc
+      else
+        acc)
+
 let substitute template env =
   let substitution_formats =
     [ ":[ ", "]"
@@ -74,12 +86,31 @@ let record_match_context pos_before pos_after =
   in
   (* substitute now *)
   if debug then Format.printf "Curr env: %s@." @@ Match.Environment.to_string !current_environment_ref;
-  let result, _ = substitute !rewrite_template !current_environment_ref in
-  (* Don't just append, but replace the match context including constant
-     strings. I.e., somewhere where we are appending the parth that matched, it
-     shouldn't, and instead just ignore. *)
-  if !rewrite then Buffer.add_string actual result;
-  matches_ref := match_context :: !matches_ref
+  begin
+    match !rule_ref with
+    | None ->
+      let result, _ = substitute !rewrite_template !current_environment_ref in
+      if !rewrite then Buffer.add_string actual result;
+      matches_ref := match_context :: !matches_ref
+    | Some rule ->
+      let rule = rule @ infer_equality_constraints !current_environment_ref in
+      let apply = Rule_language.Rule.Omega.apply in
+      let sat, env =
+        apply
+          ~substitute_in_place:true (* FIXME have both ways to do this *)
+          ~matcher:(module Rule_language.Omega_matchers.Generic) (* FIXME lookup language *)
+          rule
+          !current_environment_ref
+      in
+      let new_env = if sat then env else None in
+      match new_env with
+      | None -> ()
+      | Some env ->
+        current_environment_ref := env;
+        let result, _ = substitute !rewrite_template !current_environment_ref in
+        if !rewrite then Buffer.add_string actual result;
+        matches_ref := match_context :: !matches_ref
+  end
 
 module Make (Syntax : Syntax.S) (Info : Info.S) = struct
   include Info
@@ -842,4 +873,18 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
     match all ?configuration ?rule ~template ~source with
     | [] -> Or_error.error_string "No result"
     | (hd::_) -> Ok hd (* FIXME be efficient *)
+
+(*
+
+let apply_rule ?(substitute_in_place = true) matcher rule matches =
+  let open Option in
+  List.filter_map matches ~f:(fun ({ environment; _ } as matched) ->
+      let rule = rule @ infer_equality_constraints environment in
+      let apply = Rule.Omega.apply in
+      let sat, env = apply ~substitute_in_place ~matcher rule environment in
+      (if sat then env else None)
+      >>| fun environment -> { matched with environment }
+)
+*)
+
 end
