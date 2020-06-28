@@ -104,7 +104,8 @@ let record_match_context pos_before pos_after =
       in
       let new_env = if sat then env else None in
       match new_env with
-      | None -> ()
+      | None ->
+        if !rewrite then Buffer.add_string actual match_context.matched
       | Some env ->
         current_environment_ref := env;
         let result, _ = substitute !rewrite_template !current_environment_ref in
