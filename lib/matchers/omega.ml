@@ -800,7 +800,9 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
 
   let get_rewrite_result () =
     rewrite := false;
-    Buffer.contents actual
+    let result = Buffer.contents actual in
+    Buffer.reset actual;
+    result
 
   (** Hardcoded case when template and source are empty string. The parser logic
       is too tricky for this right now. *)
