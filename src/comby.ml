@@ -7,6 +7,7 @@ let match_ : Js.js_string Js.t -> Js.js_string Js.t -> Js.js_string Js.t =
   let source = Js.to_string source in
   let match_template = Js.to_string match_template in
   let matches = Matchers.Omega.Go.all ?configuration:None ~source ~template:match_template in
+  let matches = Pipeline.update_line_col source matches in
   let result = Yojson.Safe.to_string (`List (List.map Match.to_yojson matches)) in
   Js.string result
 

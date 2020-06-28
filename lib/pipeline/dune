@@ -1,0 +1,4 @@
+(library
+  (name pipeline)
+  (public_name comby_js.pipeline)
+  (libraries comby_js.match base))
