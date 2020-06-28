@@ -1,7 +1,6 @@
 open Base
 
 open Match
-open Language
 
 let line_map source =
   let total_len = String.length source in
@@ -75,6 +74,7 @@ let update_line_col source matches =
   let f offset = compute_line_col_fast line_lookup offset in
   List.map matches ~f:(update_match f)
 
+(*
 let infer_equality_constraints environment =
   let vars = Environment.vars environment in
   List.fold vars ~init:[] ~f:(fun acc var ->
@@ -95,3 +95,4 @@ let apply_rule ?(substitute_in_place = true) matcher rule matches =
       let sat, env = apply ~substitute_in_place ~matcher rule environment in
       (if sat then env else None)
       >>| fun environment -> { matched with environment })
+*)

@@ -7,8 +7,6 @@ open Rewriter
 open Ast
 open Omega_parser
 
-module Configuration = Matchers.Configuration
-
 type t = Ast.t
 
 type result = bool * environment option
@@ -40,12 +38,12 @@ type rewrite_context =
 let uuid_counter = ref 0
 
 let rec apply
-    ?(matcher = (module Matchers.Omega.Generic : Matchers.Matcher))
+    ?(matcher = (module Omega_matchers.Generic : Matchers_types.Matcher.S))
     ?(substitute_in_place = true)
     predicates
     env =
   let open Option in
-  let module Matcher = (val matcher : Matchers.Matcher) in
+  let module Matcher = (val matcher : Matchers_types.Matcher.S) in
 
   let equal_in_environment var value env =
     match Environment.lookup env var with

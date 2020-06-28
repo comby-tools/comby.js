@@ -5,7 +5,7 @@
   (libraries 
    ppxlib 
    core_kernel 
-   comby_js.language
+   comby_js.rule_language
    comby_js.match
    comby_js.matchers
    comby_js.pipeline

@@ -1,6 +1,6 @@
 open Base
 
-open Matchers
+open Matchers_types
 open Match
 
 open Ast
@@ -17,7 +17,7 @@ module type Engine = sig
   val create : string -> expression list Or_error.t
 
   val apply
-    :  ?matcher:(module Matcher)
+    :  ?matcher:(module Matcher.S)
     -> ?substitute_in_place:bool
     -> t
     -> environment
