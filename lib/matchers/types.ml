@@ -114,6 +114,7 @@ module Matcher = struct
     val first
       :  ?configuration:Configuration.t
       -> ?shift:int
+      -> ?rule:string
       -> string
       -> string
       -> Match.t Or_error.t
@@ -124,6 +125,7 @@ module Matcher = struct
 
     val all
       :  ?configuration:Configuration.t
+      -> ?rule:string
       -> template:string
       -> source:string
       -> Match.t list

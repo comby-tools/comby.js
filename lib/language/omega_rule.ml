@@ -80,7 +80,7 @@ let rec apply
             | String template ->
               begin
                 let configuration = match_configuration_of_syntax template in
-                Matcher.all ~configuration ~template ~source |> function
+                Matcher.all ?rule:None ~configuration ~template ~source |> function
                 | [] -> None
                 | matches ->
                   (* merge environments. overwrite behavior is undefined *)
@@ -136,7 +136,7 @@ let rec apply
             Matcher.set_rewrite_template rewrite_template;
             (* FIXME: support substitute in place *)
             let _source = if substitute_in_place then Some source else None in
-            let matches = Matcher.all ~configuration ~template ~source in
+            let matches = Matcher.all ?rule:None ~configuration ~template ~source in
             let result =
               match matches with
               | [] -> None

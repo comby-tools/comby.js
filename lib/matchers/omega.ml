@@ -823,7 +823,7 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
     in
     Match.create ~range ()
 
-  let all ?configuration ~template ~source : Match.t list =
+  let all ?configuration ?rule:_ ~template ~source : Match.t list =
     configuration_ref := Option.value configuration ~default:!configuration_ref;
     matches_ref := [];
     if String.equal template "" && String.equal source "" then [trivial]
@@ -831,10 +831,10 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
       | Ok _
       | Error _ -> List.rev !matches_ref
 
-  let first ?configuration ?shift:_ template source : Match.t Or_error.t =
+  let first ?configuration ?shift:_ ?rule template source : Match.t Or_error.t =
     configuration_ref := Option.value configuration ~default:!configuration_ref;
     matches_ref := [];
-    match all ?configuration ~template ~source with
+    match all ?configuration ?rule ~template ~source with
     | [] -> Or_error.error_string "No result"
     | (hd::_) -> Ok hd (* FIXME be efficient *)
 end
