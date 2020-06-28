@@ -1,4 +1,4 @@
 (library
   (name rewriter)
   (public_name comby_js.rewriter)
-  (libraries comby_js.matchers comby_js.replacement ppxlib))
+  (libraries comby_js.replacement ppxlib core_kernel))
