@@ -133,11 +133,17 @@ let rec apply
           let result =
             Environment.lookup env variable >>= fun source ->
             let configuration = Configuration.create ~match_kind:Fuzzy () in
+            Matcher.set_rewrite_template rewrite_template;
+            (* FIXME: support substitute in place *)
+            let _source = if substitute_in_place then Some source else None in
             let matches = Matcher.all ~configuration ~template ~source in
-            let source = if substitute_in_place then Some source else None in
-            let result = Rewrite.all ?source ~rewrite_template matches in
+            let result =
+              match matches with
+              | [] -> None
+              | _ -> Some (Matchers.Omega.C.get_rewrite_result ())
+            in
             match result with
-            | Some { rewritten_source; _ } ->
+            | Some rewritten_source ->
               (* substitute for variables that are in the outside scope *)
               let rewritten_source, _ = Rewrite_template.substitute rewritten_source env in
               let env = Environment.update env variable rewritten_source in
