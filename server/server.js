@@ -68,29 +68,18 @@ rules = [
    { match: ':[x:e] ? :[x:e] : :[x:e]', rewrite: ':[x]' }, 
 ]
 
-app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.text()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: false })); // support encoded bodies
-
-/* Debug JSON */
-app.use(function (error, req, res, next) {
-   if (error instanceof SyntaxError) {
-     console.log(error)
-   } else {
-     next();
-   }
-});
 
 app.post('/rewrite', function (req, res) {
    // console.log("Got a POST request for /mutate");
    // console.log('Body:', req.body);
    // console.log(req.body.source + " " + req.body.match + " " + req.body.rewrite);
       var mutation = rules[Math.floor(Math.random() * rules.length)];
-      var result = rewrite(req.body.source,req.body.match, req.body.rewrite, "where true");
+      var result = rewrite(req.body.source, req.body.match, req.body.rewrite, "where true");
       console.log('RESULT: ', result)
       res.send(result);
    })
-
-
 
 app.post('/mutate', function (req, res) {
    console.log('Got request: ', req.body)
@@ -98,7 +87,7 @@ app.post('/mutate', function (req, res) {
 // console.log('Body:', req.body);
 // console.log(req.body.source + " " + req.body.match + " " + req.body.rewrite);
    var mutation = rules[Math.floor(Math.random() * rules.length)];
-   var result = rewrite(req.body.source, mutation.match, mutation.rewrite, "where true");
+   var result = rewrite(req.body, mutation.match, mutation.rewrite, "where true");
    console.log('RESULT: ', result)
    res.send(result);
 })
