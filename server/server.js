@@ -3,7 +3,7 @@ var bodyParser = require('body-parser');
 var app = express();
 
 var url = require('url');
-const { match, rewrite } = require("../js/comby.js")
+const { match, rewrite, substitute } = require("../js/comby.js")
 
 rules = [
    // delete delimited body
@@ -71,25 +71,51 @@ rules = [
 app.use(bodyParser.text()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: false })); // support encoded bodies
 
-app.post('/rewrite', function (req, res) {
+app.post('/rewrite', bodyParser.json, function (req, res) {
    // console.log("Got a POST request for /mutate");
    // console.log('Body:', req.body);
    // console.log(req.body.source + " " + req.body.match + " " + req.body.rewrite);
       var mutation = rules[Math.floor(Math.random() * rules.length)];
-      var result = rewrite(req.body.source, req.body.match, req.body.rewrite, "where true");
-      console.log('RESULT: ', result)
+      var result = rewrite(req.body.source, req.body.match, req.body.rewrite, ".go", "where true");
+      console.log('RESULT: ', result);
       res.send(result);
    })
 
 app.post('/mutate', function (req, res) {
-   console.log('Got request: ', req.body)
-// console.log("Got a POST request for /mutate");
-// console.log('Body:', req.body);
-// console.log(req.body.source + " " + req.body.match + " " + req.body.rewrite);
+   console.log('Got request: ', req.body);
    var mutation = rules[Math.floor(Math.random() * rules.length)];
-   var result = rewrite(req.body, mutation.match, mutation.rewrite, "where true");
-   console.log('RESULT: ', result)
+   var result = rewrite(req.body, mutation.match, mutation.rewrite, ".go", "where true");
+   console.log('RESULT: ', result);
    res.send(result);
+})
+
+function replaceRange(source, {start, end}, replacement_text) {
+   var before = source.slice(0, start.offset);
+   var after = source.slice(end.offset, source.length);
+   return before + replacement_text + after
+}
+
+/**
+ * Sending this source will change one of the {...} with the substituted value "look ->thing<-"
+ * 
+ * curl -d '{1} {2} {3}' -H "Content-Type: text/plain" -X POST http://localhost:4448/test
+ */
+app.post('/test', function (req, res) {
+   console.log('Got request: ', req.body)
+   var matches = JSON.parse(match(req.body, '{:[1]}', '.go', 'where true'))
+   console.log('matches: ', matches)
+   if (matches.length > 0) {
+      var m = matches[Math.floor(Math.random() * matches.length)];
+      console.log('match: ', JSON.stringify(m));
+      console.log('match env: ', JSON.stringify(m.environment));
+      var substituted = substitute('look ->:[1]<-', JSON.stringify(m.environment));
+      console.log('substituted: ', substituted);
+      var result = replaceRange(req.body, m.range, substituted);
+      console.log('result: ', result);
+      res.send(result);
+      return
+   }
+   res.send('');
 })
 
 var server = app.listen(4448, function () {
