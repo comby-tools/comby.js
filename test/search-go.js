@@ -6,7 +6,7 @@ var fs = require('fs'),
 
 fs.readFile(filePath, {encoding: 'utf-8'}, function(err,data){
     if (!err) {
-		console.log(match(data, "(:[1])", "", ""));
+		console.log(match(data, "(:[1])", ".go", ""));
     } else {
         console.log(err);
     }
