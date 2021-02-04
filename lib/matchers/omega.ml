@@ -868,7 +868,7 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
       | Ok _
       | Error _ ->
         let matches = List.rev !matches_ref in
-        let nested_matches = compute_nested_matches ?configuration template matches in
+        let nested_matches = compute_nested_matches ?configuration ?rule template matches in
         nested_matches @ matches
   and compute_nested_matches ?configuration ?rule template matches =
     let open Match in
