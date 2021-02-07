@@ -856,17 +856,87 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
     in
     Match.create ~range ()
 
-  let all ?configuration ?rule ~template ~source : Match.t list =
+  let all ?configuration ?rule ~template ~source:original_source : Match.t list =
     configuration_ref := Option.value configuration ~default:!configuration_ref;
     begin match rule with
       | None | Some "" -> rule_ref := None
       | Some r -> rule_ref := Some (Rule_language.Rule.Omega.create r |> Or_error.ok_exn)
     end;
-    matches_ref := [];
-    if String.equal template "" && String.equal source "" then [trivial]
-    else match first_is_broken template source with
-      | Ok _
-      | Error _ -> List.rev !matches_ref
+    let nested =
+      match !rule_ref with
+      | None -> false
+      | Some rule ->
+        let options = Rule_language.Rule.Omega.options rule in
+        options.nested
+    in
+    let rec aux_all ?configuration ?(nested = false) ~template ~source () =
+      matches_ref := [];
+      if String.is_empty template && String.is_empty source then [trivial]
+      else match first_is_broken template source with
+        | Ok _
+        | Error _ ->
+          let matches = List.rev !matches_ref in
+          if nested then
+            (compute_nested_matches ?configuration ~nested template matches) @ matches
+          else
+            matches
+    and compute_nested_matches ?configuration ?nested template matches =
+      let open Match in
+      let open Range in
+      let rec aux acc matches =
+        match (matches : Match.t list) with
+        | [] -> acc
+        | { environment; _ }::rest ->
+          List.fold ~init:acc (Environment.vars environment) ~f:(fun acc v ->
+              let source_opt = Environment.lookup environment v in
+              match source_opt with
+              | Some source ->
+                let nested_matches =
+                  let matches = aux_all ?configuration ?nested ~template ~source () in
+                  let { match_start = ms; _ } = Option.value_exn (Environment.lookup_range environment v) in
+                  List.map matches ~f:(fun m ->
+                      let environment =
+                        List.fold (Environment.vars m.environment) ~init:m.environment ~f:(fun env var ->
+                            let open Option in
+                            let updated : environment option =
+                              Environment.lookup_range env var
+                              >>| fun r ->
+                              let range = {
+                                match_start =
+                                  { r.match_start with offset = ms.offset + r.match_start.offset } ;
+                                match_end =
+                                  { r.match_end with offset = ms.offset + r.match_end.offset }
+                              }
+                              in
+                              Environment.update_range env var range
+                            in
+                            match updated with
+                            | None -> env
+                            | Some env -> env)
+                      in
+                      let range = {
+                        match_start =
+                          { m.range.match_start with offset = ms.offset + m.range.match_start.offset  } ;
+                        match_end =
+                          { m.range.match_end with offset = ms.offset + m.range.match_end.offset }
+                      }
+                      in
+                      { m with range; environment })
+                in
+                acc @ nested_matches
+              | _ -> acc)
+          @ aux acc rest
+      in
+      aux [] matches
+    in
+    if nested then
+      let open Match in
+      (* Use sort on offset for a top-down ordering. *)
+      aux_all ?configuration ~nested ~template ~source:original_source ()
+      |> List.sort ~compare:(fun left right -> left.range.match_start.offset - right.range.match_start.offset)
+    else
+      (* Don't reverse the list for non-nested matches--it matters for rewriting. *)
+      aux_all ?configuration ~nested ~template ~source:original_source ()
 
   let first ?configuration ?shift:_ ?rule template source : Match.t Or_error.t =
     configuration_ref := Option.value configuration ~default:!configuration_ref;
@@ -874,18 +944,4 @@ module Make (Syntax : Syntax.S) (Info : Info.S) = struct
     match all ?configuration ?rule ~template ~source with
     | [] -> Or_error.error_string "No result"
     | (hd::_) -> Ok hd (* FIXME be efficient *)
-
-(*
-
-let apply_rule ?(substitute_in_place = true) matcher rule matches =
-  let open Option in
-  List.filter_map matches ~f:(fun ({ environment; _ } as matched) ->
-      let rule = rule @ infer_equality_constraints environment in
-      let apply = Rule.Omega.apply in
-      let sat, env = apply ~substitute_in_place ~matcher rule environment in
-      (if sat then env else None)
-      >>| fun environment -> { matched with environment }
-)
-*)
-
 end

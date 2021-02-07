@@ -7,6 +7,7 @@ type antecedent = atom
 type expression =
   | True
   | False
+  | Option of string
   | Equal of atom * atom
   | Not_equal of atom * atom
   | Match of atom * (antecedent * consequent) list

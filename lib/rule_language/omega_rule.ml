@@ -11,6 +11,10 @@ type t = Ast.t
 
 type result = bool * environment option
 
+type options = Options.t
+
+let options = Options.of_rule
+
 let (|>>) p f =
   p >>= fun x -> return (f x)
 
@@ -55,6 +59,7 @@ let rec apply
     function
     | True -> true, Some env
     | False -> false, Some env
+    | Option _ -> true, Some env
     | Equal (Variable var, String value)
     | Equal (String value, Variable var) ->
       equal_in_environment var value env
@@ -203,6 +208,7 @@ let create rule =
   in
   let true' = spaces *> string Syntax.true' <* spaces |>> fun _ -> True in
   let false' = spaces *> string Syntax.false' <* spaces |>> fun _ -> False in
+  let option_parser = spaces *> string Syntax.option_nested <* spaces |>> fun _ -> Option "nested" in
   let expression_parser =
     fix (fun expression_parser ->
         let match_pattern_parser =
@@ -236,6 +242,7 @@ let create rule =
           ; operator_parser
           ; true'
           ; false'
+          ; option_parser
           ])
   in
   let rule_parser =
