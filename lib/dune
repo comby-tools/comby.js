@@ -10,5 +10,4 @@
    comby_js.matchers
    comby_js.pipeline
    comby_js.replacement
-   comby_js.rewriter
-   comby_js.statistics))
+   comby_js.rewriter))
