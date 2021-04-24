@@ -1,0 +1,13 @@
+{
+  "name": "comby.js",
+  "version": "0.1.0",
+  "main": "index.js",
+  "repository": "git@github.com:d4hines/comby.js.git",
+  "contributors": [
+    "Daniel Hines <daniel@goldencube.info>"
+  ],
+  "license": "Apache-2.0",
+  "dependencies": {
+    "commander": "^7.2.0"
+  }
+}
