@@ -1,7 +1,9 @@
 {
   "name": "d4hines-comby.js",
   "version": "0.1.0",
-  "bin": "comby",
+  "bin": {
+  "comby": "index.js"
+  },
   "main": "index.js",
   "repository": "git@github.com:d4hines/comby.js.git",
   "contributors": [
