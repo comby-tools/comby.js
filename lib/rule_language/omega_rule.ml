@@ -252,6 +252,6 @@ let create rule =
     *> sep_by1 (spaces *> char ',' <* spaces) expression_parser
     <* end_of_input
   in
-  match parse_string rule_parser rule with
+  match parse_string ~consume:All rule_parser rule with
   | Ok rule -> Or_error.return rule
   | Error error -> Or_error.error_string error
