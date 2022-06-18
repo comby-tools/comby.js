@@ -22,6 +22,9 @@ if [ "$O" != "396" ]; then
     exit 1
 fi
 
+P=`node search-go-super-big.js | jq length`
 
-
-
+if [ "$P" != "7312" ]; then
+    echo "Bad search-go-super-big.js, want $P"
+    exit 1
+fi
