@@ -1,0 +1,4 @@
+(env
+ (_
+  (flags
+   (:standard -alert -deprecated -w -32))))

@@ -1,0 +1,35 @@
+(executable
+ (name comby_lite)
+ (modes byte js)
+ (preprocess
+  (pps js_of_ocaml-ppx))
+ (libraries
+  comby-kernel.match
+  comby-kernel.matchers
+  comby-kernel.replacement
+  js_of_ocaml
+  yojson))
+
+(rule
+ (alias default)
+ (targets comby_lite.bundle.js)
+ (deps comby_lite.bc)
+ (action
+  (progn
+   (run %{bin:js_of_ocaml}
+        --pretty
+        --no-inline
+        --source-map
+        -o %{targets}
+        %{lib:base:runtime.js}
+        %{lib:base:base_internalhash_types/runtime.js}
+        %{lib:bin_prot:runtime.js}
+        %{lib:time_now:runtime.js}
+        %{lib:ppx_expect:collector/runtime.js}
+        %{lib:base_bigstring:runtime.js}
+        %{lib:core_kernel:strftime.js}
+        %{lib:core_kernel:runtime.js}
+        %{lib:bigstringaf:runtime.js}
+        %{deps})
+   (run sed -i.bak "s/var max_steps = 20, steps = \\[0, max_steps\\]/var max_steps = 1, steps = [0, max_steps]/" %{targets})
+   (run rm %{targets}.bak))))
