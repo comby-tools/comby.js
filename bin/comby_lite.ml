@@ -93,8 +93,22 @@ let substitute template environment =
      | Error message -> Js.string message)
   | exception Yojson.Json_error message -> Js.string ("could not parse: " ^ message)
 
+let set_regex_backend backend =
+  match String.lowercase_ascii (Js.to_string backend) with
+  | "js" | "javascript" ->
+    Matchers.Regexp.set_backend Matchers.Regexp.JavaScript;
+    Js.string (Matchers.Regexp.get_backend_name ())
+  | "re" | "ocaml" ->
+    Matchers.Regexp.set_backend Matchers.Regexp.Re;
+    Js.string (Matchers.Regexp.get_backend_name ())
+  | name -> Js.string ("unknown regex backend: " ^ name)
+
+let get_regex_backend () = Js.string (Matchers.Regexp.get_backend_name ())
+
 let () =
   Js.export "match" match_;
   Js.export "rewrite" rewrite;
   Js.export "rewriteJson" rewrite_json;
-  Js.export "substitute" substitute
+  Js.export "substitute" substitute;
+  Js.export "setRegexBackend" set_regex_backend;
+  Js.export "getRegexBackend" get_regex_backend

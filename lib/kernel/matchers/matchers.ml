@@ -12,6 +12,7 @@ end
 module Evaluate = Evaluate
 module Matcher_engine = Matcher_engine
 include Matcher_engine
+module Regexp = Regexp
 module Matcher = Types.Matcher
 module Hole = Types.Hole
 module Language = Types.Language

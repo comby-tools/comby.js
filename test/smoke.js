@@ -19,5 +19,6 @@ assert.equal(regexMatches.length, 2);
 const regexEnv = Object.fromEntries(regexMatches[0].environment.map(({ variable, value }) => [variable, value]));
 assert.equal(regexEnv.x, "abc");
 assert.equal(regexEnv.n, "123");
+assert.equal(comby.getRegexBackend(), "js");
 
 console.log("ok");

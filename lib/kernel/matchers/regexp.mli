@@ -25,3 +25,21 @@ module RE : sig
   module Engine : Regexp_engine_intf
   include module type of Make (Engine)
 end
+
+module JS : sig
+  module Engine : Regexp_engine_intf
+  include module type of Make (Engine)
+end
+
+type backend =
+  | JavaScript
+  | Re
+
+val set_backend : backend -> unit
+val get_backend : unit -> backend
+val get_backend_name : unit -> string
+
+module Active : sig
+  module Engine : Regexp_engine_intf
+  include module type of Make (Engine)
+end

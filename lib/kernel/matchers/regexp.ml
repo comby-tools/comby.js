@@ -87,3 +87,89 @@ module RE = struct
 
   include Make (Engine)
 end
+
+module JS = struct
+  module Js = Js_of_ocaml.Js
+
+  module Engine : Regexp_engine_intf = struct
+    type t = Js.regExp Js.t
+    type substrings = Js.match_result Js.t
+
+    let make pattern =
+      new%js Js.regExp_withFlags (Js.bytestring ("^(?:" ^ pattern ^ ")")) (Js.string "")
+
+    let get_substring s idx =
+      Js.Optdef.to_option (Js.Optdef.map (Js.array_get s idx) Js.to_bytestring)
+
+    let get_all_substrings s =
+      (* The current parser only needs group 0 for match length. *)
+      match get_substring s 0 with
+      | Some matched -> [| matched |]
+      | None -> [||]
+
+    let exec ~rex ~pos b =
+      let s = Bytes.unsafe_to_string b in
+      let len = String.length s - pos in
+      let s = if pos = 0 then s else String.sub s pos len in
+      Js.Opt.to_option (Js.Opt.map (rex##exec (Js.bytestring s)) Js.match_result)
+  end
+
+  include Make (Engine)
+end
+
+type backend =
+  | JavaScript
+  | Re
+
+let backend =
+  ref
+    (match Sys.backend_type with
+     | Other _ -> JavaScript
+     | Native | Bytecode -> Re)
+
+let set_backend = function
+  | JavaScript -> backend := JavaScript
+  | Re -> backend := Re
+
+let backend_to_string = function
+  | JavaScript -> "js"
+  | Re -> "re"
+
+let get_backend () = !backend
+let get_backend_name () = backend_to_string !backend
+
+module Active = struct
+  module Engine : Regexp_engine_intf = struct
+    type t =
+      | JavaScript of JS.Engine.t
+      | Re of RE.Engine.t
+
+    type substrings =
+      | JavaScript_substrings of JS.Engine.substrings
+      | Re_substrings of RE.Engine.substrings
+
+    let make pattern =
+      match !backend with
+      | JavaScript -> JavaScript (JS.Engine.make pattern)
+      | Re -> Re (RE.Engine.make pattern)
+
+    let get_substring substrings idx =
+      match substrings with
+      | JavaScript_substrings substrings -> JS.Engine.get_substring substrings idx
+      | Re_substrings substrings -> RE.Engine.get_substring substrings idx
+
+    let get_all_substrings = function
+      | JavaScript_substrings substrings -> JS.Engine.get_all_substrings substrings
+      | Re_substrings substrings -> RE.Engine.get_all_substrings substrings
+
+    let exec ~rex ~pos b =
+      match rex with
+      | JavaScript rex ->
+        Option.map
+          (fun substrings -> JavaScript_substrings substrings)
+          (JS.Engine.exec ~rex ~pos b)
+      | Re rex -> Option.map (fun substrings -> Re_substrings substrings) (RE.Engine.exec ~rex ~pos b)
+  end
+
+  include Make (Engine)
+end
