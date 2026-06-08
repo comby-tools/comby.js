@@ -1,5 +1,5 @@
 const assert = require("node:assert/strict");
-const comby = require("../_build/default/bin/comby_lite.bundle.js");
+const comby = require("../_build/default/bin/comby_js.bundle.js");
 
 const source = "foo(1); foo(2);";
 const matches = JSON.parse(comby.match(source, "foo(:[x])", ".js", ""));

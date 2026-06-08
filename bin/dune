@@ -1,5 +1,5 @@
 (executable
- (name comby_lite)
+ (name comby_js)
  (modes byte js)
  (preprocess
   (pps js_of_ocaml-ppx))
@@ -12,8 +12,8 @@
 
 (rule
  (alias default)
- (targets comby_lite.bundle.js)
- (deps comby_lite.bc)
+ (targets comby_js.bundle.js)
+ (deps comby_js.bc)
  (action
   (progn
    (run %{bin:js_of_ocaml}
@@ -25,10 +25,10 @@
         %{lib:base:base_internalhash_types/runtime.js}
         %{lib:bin_prot:runtime.js}
         %{lib:time_now:runtime.js}
-        %{lib:ppx_expect:collector/runtime.js}
+        %{lib:ppx_expect.runtime:runtime.js}
         %{lib:base_bigstring:runtime.js}
-        %{lib:core_kernel:strftime.js}
-        %{lib:core_kernel:runtime.js}
+        %{lib:ocaml_intrinsics_kernel:runtime.js}
+        %{lib:core:runtime.js}
         %{lib:bigstringaf:runtime.js}
         %{deps})
    (run sed -i.bak "s/var max_steps = 20, steps = \\[0, max_steps\\]/var max_steps = 1, steps = [0, max_steps]/" %{targets})

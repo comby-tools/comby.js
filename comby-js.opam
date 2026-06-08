@@ -21,4 +21,4 @@ depends: [
   "js_of_ocaml"
   "js_of_ocaml-ppx"
 ]
-synopsis: "Lite JavaScript build of the Comby kernel"
+synopsis: "JavaScript build of the Comby kernel"

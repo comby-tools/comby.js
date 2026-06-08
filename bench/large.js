@@ -1,4 +1,4 @@
-const comby = require("../_build/default/bin/comby_lite.bundle.js");
+const comby = require("../_build/default/bin/comby_js.bundle.js");
 
 const n = Number(process.argv[2] || 10000);
 const source = Array.from({ length: n }, (_, i) => `foo(${i});`).join("\n");

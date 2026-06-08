@@ -1,6 +1,6 @@
-# comby-lite
+# comby-js
 
-`comby-lite` is a JavaScript build of Comby's core structural match and rewrite
+`comby-js` is a JavaScript build of Comby's core structural match and rewrite
 engine. It is intended for embedding Comby-style matching in Node or browser
 tooling without shelling out to the native `comby` binary.
 
@@ -10,29 +10,54 @@ available as a fallback.
 
 ## Install
 
-Install OCaml dependencies:
+Install OCaml dependencies in an OCaml 5 switch:
 
 ```sh
-opam install . --deps-only
+opam switch create comby-ocaml-5 ocaml-base-compiler.5.3.0
+opam install --switch=comby-ocaml-5 . --deps-only
 ```
 
-Build the JavaScript bundle:
+Build the JavaScript bundle and copy it to `dist/`:
 
 ```sh
-opam exec -- dune build bin/comby_lite.bundle.js
+make
 ```
 
-The generated CommonJS bundle is:
+This runs Dune under the active opam switch and writes:
 
 ```text
-_build/default/bin/comby_lite.bundle.js
+dist/comby.js
+```
+
+To build with a specific switch:
+
+```sh
+OPAMSWITCH=my-switch make
+```
+
+Clean generated Dune and JavaScript package artifacts:
+
+```sh
+make clean
+```
+
+Install the local command, if you want `comby` on your `PATH`:
+
+```sh
+npm install -g .
+```
+
+You can also run it directly from the checkout:
+
+```sh
+printf 'foo(1); foo(2);' \
+  | node bin/comby.js 'foo(:[x])' 'bar(:[x])' .js -stdin -stdout
 ```
 
 Run the smoke tests:
 
 ```sh
-node test/smoke.js
-node test/regex-suite.js
+make test
 ```
 
 Run a synthetic benchmark:
@@ -43,8 +68,61 @@ node bench/large.js 10000
 
 ## Use
 
+### CLI
+
+`comby` accepts a small Comby-compatible command shape:
+
+```sh
+comby MATCH_TEMPLATE REWRITE_TEMPLATE [EXTENSION] [FILES...] [OPTIONS]
+```
+
+Run directly from the checkout:
+
+```sh
+printf 'foo(1); foo(2);' \
+  | node bin/comby.js 'foo(:[x])' 'bar(:[x])' .js -stdin -stdout
+```
+
+After `npm install -g .`, invoke the installed binary:
+
+```sh
+printf 'foo(1); foo(2);' \
+  | comby 'foo(:[x])' 'bar(:[x])' .js -stdin -stdout
+```
+
+Print matches as JSON lines:
+
+```sh
+printf 'foo(1); foo(2);' \
+  | comby 'foo(:[x])' '' .js -stdin -match-only -json-lines
+```
+
+Rewrite a file in place:
+
+```sh
+comby 'foo(:[x])' 'bar(:[x])' .js src/file.js -in-place
+```
+
+Useful options:
+
+- `-stdin`: read source from stdin
+- `-stdout`: print rewritten source to stdout
+- `-match-only`, `-only-matching`, `-o`: print matches instead of rewriting
+- `-json-lines`: print one JSON object per input
+- `-count`: print match counts
+- `-in-place`: rewrite file inputs in place
+- `-matcher`, `-lang`, `-l`: set the matcher extension, for example `.js`
+- `-rule RULE`: apply a Comby rule
+- `-regex-backend js|re`: select JavaScript `RegExp` or OCaml `Re` regex holes
+
+The CLI currently implements the basic match/rewrite path. It does not include
+the full native Comby command surface for project-wide search, interactive
+review, diff display, or editor integrations.
+
+### JavaScript API
+
 ```js
-const comby = require("./_build/default/bin/comby_lite.bundle.js");
+const comby = require("comby-js");
 
 const source = "foo(1); foo(2);";
 

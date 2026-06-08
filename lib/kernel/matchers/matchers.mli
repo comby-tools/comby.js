@@ -3,13 +3,13 @@ module Languages = Languages
 module Metasyntax = Metasyntax
 module External = External
 module Rule = Rule
+module Regexp = Regexp
 
 (* Only need to expose Types.Ast. module type of to export sexp. *)
 module Ast : module type of Types.Ast
 module Evaluate = Evaluate
 module Matcher_engine : module type of Matcher_engine
 include module type of Matcher_engine
-module Regexp : module type of Regexp
 module Matcher = Types.Matcher
 module Hole = Types.Hole
 module Language = Types.Language

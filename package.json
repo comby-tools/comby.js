@@ -1,0 +1,24 @@
+{
+  "name": "comby-js",
+  "version": "0.1.0",
+  "description": "JavaScript build of Comby's core structural match and rewrite engine.",
+  "license": "Apache-2.0",
+  "main": "dist/comby.js",
+  "bin": {
+    "comby": "bin/comby.js"
+  },
+  "files": [
+    "AGENTS.md",
+    "README.md",
+    "bin/comby.js",
+    "dist/comby.js"
+  ],
+  "scripts": {
+    "build": "opam exec -- dune build bin/comby_js.bundle.js && mkdir -p dist && (chmod u+w dist/comby.js 2>/dev/null || true) && cp _build/default/bin/comby_js.bundle.js dist/comby.js",
+    "test": "npm run build && node test/smoke.js && node test/regex-suite.js && node test/cli-smoke.js",
+    "prepack": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
