@@ -4,7 +4,7 @@
 engine. It is intended for embedding Comby-style matching in Node or browser
 tooling without shelling out to the native `comby` binary.
 
-This package uses the simplified Omega-only kernel from `comby-redux`. Regex
+This package uses the simplified Omega-only kernel from [`comby`](https://github.com/comby-tools/comby). Regex
 holes default to JavaScript `RegExp` in the generated JS bundle, with OCaml `Re`
 available as a fallback.
 
